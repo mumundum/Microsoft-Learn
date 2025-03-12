@@ -1,0 +1,1 @@
+https://learn.microsoft.com/en-us/training/modules/build-first-bicep-template/
