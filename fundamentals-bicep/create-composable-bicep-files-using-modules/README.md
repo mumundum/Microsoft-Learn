@@ -1,0 +1,1 @@
+https://learn.microsoft.com/en-us/training/modules/create-composable-bicep-files-using-modules/
