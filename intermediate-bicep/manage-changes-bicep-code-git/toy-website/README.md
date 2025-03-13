@@ -1,0 +1,1 @@
+https://learn.microsoft.com/en-us/training/modules/manage-changes-bicep-code-git/3-exercise-initialize-git-repository
