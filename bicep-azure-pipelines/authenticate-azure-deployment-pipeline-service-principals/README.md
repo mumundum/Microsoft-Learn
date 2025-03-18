@@ -1,0 +1,1 @@
+https://learn.microsoft.com/en-us/training/modules/authenticate-azure-deployment-pipeline-service-principals/
