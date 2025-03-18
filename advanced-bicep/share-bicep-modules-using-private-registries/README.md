@@ -1,0 +1,1 @@
+https://learn.microsoft.com/en-us/training/modules/share-bicep-modules-using-private-registries/
