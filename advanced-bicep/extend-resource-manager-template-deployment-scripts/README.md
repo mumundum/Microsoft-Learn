@@ -1,0 +1,1 @@
+https://learn.microsoft.com/en-us/training/modules/extend-resource-manager-template-deployment-scripts/
