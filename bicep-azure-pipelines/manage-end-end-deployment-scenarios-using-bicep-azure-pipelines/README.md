@@ -1,0 +1,1 @@
+https://learn.microsoft.com/en-us/training/modules/manage-end-end-deployment-scenarios-using-bicep-azure-pipelines/
