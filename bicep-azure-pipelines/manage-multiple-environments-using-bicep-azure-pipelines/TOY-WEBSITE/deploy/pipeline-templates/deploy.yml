@@ -1,10 +1,6 @@
 parameters:
 - name: environmentType
   type: string
-- name: resourceGroupName
-  type: string
-- name: serviceConnectionName
-  type: string
 - name: deploymentDefaultLocation
   type: string
   default: westus3
@@ -17,18 +13,22 @@ stages:
     jobs:
     - job: ValidateBicepCode
       displayName: Validate Bicep code
+      variables:
+      - group: ToyWebsite${{parameters.environmentType}}
       steps:
         - task: AzureResourceManagerTemplateDeployment@3
           name: RunPreflightValidation
           displayName: Run preflight validation
           inputs:
-            connectedServiceName: ${{parameters.serviceConnectionName}}
+            connectedServiceName: ToyWebsite${{parameters.environmentType}}
             location: ${{parameters.deploymentDefaultLocation}}
             deploymentMode: Validation
-            resourceGroupName: ${{parameters.resourceGroupName}}
+            resourceGroupName: $(ResourceGroupName)
             csmFile: deploy/main.bicep
             overrideParameters: >
-              -environmentType ${{parameters.environmentType}}
+              -environmentType $(EnvironmentType)
+              -reviewApiUrl $(ReviewApiUrl)
+              -reviewApiKey $(ReviewApiKey)
 
 - ${{ if eq(parameters.environmentType, 'Production') }}:
   - stage: Preview_${{parameters.environmentType}}
@@ -36,25 +36,31 @@ stages:
     jobs:
     - job: PreviewAzureChanges
       displayName: Preview Azure changes
+      variables:
+      - group: ToyWebsite${{parameters.environmentType}}
       steps:
         - task: AzureCLI@2
           name: RunWhatIf
           displayName: Run what-if
           inputs:
-            azureSubscription: ${{parameters.serviceConnectionName}}
+            azureSubscription: ToyWebsite${{parameters.environmentType}}
             scriptType: 'bash'
             scriptLocation: 'inlineScript'
             inlineScript: |
               az deployment group what-if \
-                --resource-group ${{parameters.resourceGroupName}} \
+                --resource-group $(ResourceGroupName) \
                 --template-file deploy/main.bicep \
-                --parameters environmentType=${{parameters.environmentType}}
+                --parameters environmentType=$(EnvironmentType) \
+                             reviewApiUrl=$(ReviewApiUrl) \
+                             reviewApiKey=$(ReviewApiKey)
 
 - stage: Deploy_${{parameters.environmentType}}
   displayName: Deploy (${{parameters.environmentType}} Environment)
   jobs:
   - deployment: DeployWebsite
     displayName: Deploy website
+    variables:
+    - group: ToyWebsite${{parameters.environmentType}}
     environment: ${{parameters.environmentType}}
     strategy:
       runOnce:
@@ -66,13 +72,15 @@ stages:
               name: DeployBicepFile
               displayName: Deploy Bicep file
               inputs:
-                connectedServiceName: ${{parameters.serviceConnectionName}}
+                connectedServiceName: ToyWebsite${{parameters.environmentType}}
                 deploymentName: $(Build.BuildNumber)
                 location: ${{parameters.deploymentDefaultLocation}}
-                resourceGroupName: ${{parameters.resourceGroupName}}
+                resourceGroupName: $(ResourceGroupName)
                 csmFile: deploy/main.bicep
                 overrideParameters: >
-                  -environmentType ${{parameters.environmentType}}
+                  -environmentType $(EnvironmentType)
+                  -reviewApiUrl $(ReviewApiUrl)
+                  -reviewApiKey $(ReviewApiKey)
                 deploymentOutputs: deploymentOutputs
 
             - bash: |

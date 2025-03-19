@@ -18,12 +18,8 @@ stages:
 - template: pipeline-templates/deploy.yml
   parameters:
     environmentType: Test
-    resourceGroupName: ToyWebsiteTest
-    serviceConnectionName: ToyWebsiteTest
 
 # Deploy to the production environment.
 - template: pipeline-templates/deploy.yml
   parameters:
     environmentType: Production
-    resourceGroupName: ToyWebsiteProduction
-    serviceConnectionName: ToyWebsiteProduction
