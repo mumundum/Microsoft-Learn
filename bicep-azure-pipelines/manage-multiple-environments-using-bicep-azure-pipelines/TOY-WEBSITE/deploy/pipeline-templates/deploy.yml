@@ -59,6 +59,8 @@ stages:
   jobs:
   - deployment: DeployWebsite
     displayName: Deploy website
+    pool:
+      vmImage: windows-latest
     variables:
     - group: ToyWebsite${{parameters.environmentType}}
     environment: ${{parameters.environmentType}}
@@ -84,11 +86,23 @@ stages:
                 deploymentOutputs: deploymentOutputs
 
             - bash: |
+                echo "##vso[task.setvariable variable=appServiceAppName]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.appServiceAppName.value')"
                 echo "##vso[task.setvariable variable=appServiceAppHostName;isOutput=true]$(echo $DEPLOYMENT_OUTPUTS | jq -r '.appServiceAppHostName.value')"
               name: SaveDeploymentOutputs
               displayName: Save deployment outputs into variables
               env:
                 DEPLOYMENT_OUTPUTS: $(deploymentOutputs)
+
+            - task: AzureRmWebAppDeployment@4
+              name: DeployWebsiteApp
+              displayName: Deploy website
+              inputs:
+                appType: webApp
+                ConnectionType: AzureRM
+                azureSubscription: ToyWebsite${{parameters.environmentType}}
+                ResourceGroupName: $(ResourceGroupName)
+                WebAppName: $(appServiceAppName)
+                Package: '$(Pipeline.Workspace)/website/publish.zip'
 
 - stage: SmokeTest_${{parameters.environmentType}}
   displayName: Smoke Test (${{parameters.environmentType}} Environment)
